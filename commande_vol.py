@@ -376,7 +376,7 @@ def recupere_pos(msg):
     global drone
     drone.x, drone.y, drone.z = msg.pose.position.x, msg.pose.position.y, msg.pose.position.z
     print "source !!!! ", (drone.x, drone.y, drone.z)
-    sleep(1)
+    sleep(0.1)
 
 def param_map(msg):
     print msg.map_load_time
@@ -398,6 +398,7 @@ def make_map(msg):
     quadmap = map_light(raw_map, l, h)
     print len(quadmap)
     map = map2tile(raw_map, l ,h)
+    sleep(3)
 
 def map_light(map, l, h):
     Node.map = map
@@ -411,15 +412,18 @@ def map_light(map, l, h):
 
 if __name__ == "__main__":
     rospy.init_node('recupere_carte')
+    rate = rospy.Rate(100)
     drone = Object(0, 0, 0, False)
     chemin = []
     running_astar = False
 
+    pub_chemin = rospy.Publisher("chemin", Chemin)
+
 
     while not rospy.is_shutdown():
-        sub_pos = rospy.Subscriber('slam_out_pose', PoseStamped, recupere_pos)
+        sub_pos = rospy.Subscriber('slam_out_pose', PoseStamped, recupere_pos, queue_size=1)
         if not running_astar:
             sub_map = rospy.Subscriber('map', OccupancyGrid, make_map)
-        sleep(0.01)
         if type(map) is list:
             IA_quad_mpv()
+        rospy.sleep(rate)
