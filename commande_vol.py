@@ -9,11 +9,12 @@ import heapq
 import rospy
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import MapMetaData, OccupancyGrid
+from custom_msgs.msg import Chemin
 from quadtree import QuadTree, Node
 
 SEUIL = 80
 PROXIMITE = 2
-PORTEE = 2
+PORTEE = 2/0.05
 
 class Tile:
     #a tile of the map and its properties
@@ -328,8 +329,9 @@ def IA_quad_mpv():
     # for point in chemin:
     #     drone.move_towards(point[0], point[1])
 
-    point = chemin.pop(0)
-    drone.move_towards(point[0], point[1])
+    #point = chemin.pop(0)
+    #drone.move_towards(point[0], point[1])
+    pub_chemin.publish((chemin[:][0], chemin[:][1]))
 
 
 def IA_cpp():
@@ -423,7 +425,7 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
         sub_pos = rospy.Subscriber('slam_out_pose', PoseStamped, recupere_pos, queue_size=1)
         if not running_astar:
-            sub_map = rospy.Subscriber('map', OccupancyGrid, make_map)
+            sub_map = rospy.Subscriber('map', OccupancyGrid, make_map, queue_size=1)
         if type(map) is list:
             IA_quad_mpv()
-        rospy.sleep(rate)
+        rate.sleep()
